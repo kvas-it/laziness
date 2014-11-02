@@ -1,0 +1,44 @@
+{
+  "name": "laziness",
+  "version": "0.0.0",
+  "main": "lib/laziness.js",
+  "description": "General purpose lazy evaluation library.",
+  "homepage": "https://github.com/kvas-it/laziness",
+  "bugs": "https://github.com/kvas-it/laziness/issues",
+  "author": {
+    "name": "Vasily Kuznetsov",
+    "email": "kvas.it@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kvas-it/laziness"
+  },
+  "license": "MIT",
+  "files": [
+    "lib"
+  ],
+  "keywords": [
+    "laziness",
+    "lazy evaluation",
+    "promise"
+  ],
+  "jscsConfig": {
+    "preset": "yandex"
+  },
+  "devDependencies": {
+    "grunt-contrib-jshint": "^0.10.0",
+    "grunt-contrib-nodeunit": "^0.3.3",
+    "grunt-contrib-watch": "^0.6.1",
+    "grunt-mocha-cli": "^1.9.0",
+    "jshint-stylish": "^0.2.0",
+    "load-grunt-tasks": "^0.4.0",
+    "should": "^4.1.0",
+    "time-grunt": "^0.3.1"
+  },
+  "scripts": {
+    "test": "grunt"
+  },
+  "dependencies": {
+    "q": "^1.0.1"
+  }
+}
