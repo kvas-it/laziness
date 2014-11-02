@@ -51,7 +51,7 @@ describe('Laziness module', function () {
         deferred.resolve(42);
     });
 
-    it('should support lazy functions with simple arguments', function (done) {
+    it('should support lazy functions with simple argument', function (done) {
         var lv = L.func(function (arg) {
             return arg + 1;
         })(41);
@@ -59,5 +59,37 @@ describe('Laziness module', function () {
         lv.then(function (result) {
             result.should.be.eql(42);
         }).done(done);
+    });
+
+    it('should support promised argument', function (done) {
+        var deferred = Q.defer();
+        var run = false;
+        var lv = L.func(function (arg) {
+            run = true;
+            return arg + 1;
+        })(deferred.promise);
+
+        lv.then(function (result) {
+            result.should.be.eql(42);
+        }).done(done);
+
+        run.should.be.eql(false);
+        deferred.resolve(41);
+    });
+
+    it('should support two promised arguments', function (done) {
+        var d1 = Q.defer();
+        var d2 = Q.defer();
+
+        var lv = L.func(function (a, b) {
+            return a + b
+        })(d1.promise, d2.promise);
+
+        lv.then(function (result) {
+            result.should.be.eql(42);
+        }).done(done);
+
+        d1.resolve(40);
+        d2.resolve(2)
     });
 });
