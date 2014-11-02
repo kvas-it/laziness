@@ -9,25 +9,25 @@ var L = require('../lib/laziness');
 
 describe('Laziness module', function () {
 
-    it('should support simple lazy functions', function () {
+    it('should support lazy functions with no arguments', function () {
         var run = false;
-        var lf = L.func(function () {
+        var lv = L.func(function () {
             run = true;
             return 42;
-        });
+        })();
 
-        lf.isReady().should.be.eql(false);
+        lv.isReady().should.be.eql(false);
         run.should.be.eql(false);
-        lf.force();
-        lf.isReady().should.be.eql(true);
+        lv.force();
+        lv.isReady().should.be.eql(true);
         run.should.be.eql(true);
-        lf.get().should.be.eql(42);
+        lv.get().should.be.eql(42);
     });
 
     it('should be thenable', function (done) {
-        var lf = L.func(function () {return 42;});
+        var lv = L.func(function () {return 42;})();
 
-        lf.then(function (result) {
+        lv.then(function (result) {
             result.should.be.eql(42);
         }).done(done);
     });
@@ -36,18 +36,28 @@ describe('Laziness module', function () {
         var run = false;
         var deferred = Q.defer();
 
-        var lf = L.func(function () {
+        var lv = L.func(function () {
             run = true;
             return deferred.promise;
-        });
+        })();
 
-        lf.then(function (result) {
+        lv.then(function (result) {
             result.should.be.eql(42);
-            lf.isReady().should.be.eql(true);
+            lv.isReady().should.be.eql(true);
         }).done(done);
 
         run.should.be.eql(true);
-        lf.isReady().should.be.eql(false);
+        lv.isReady().should.be.eql(false);
         deferred.resolve(42);
+    });
+
+    it('should support lazy functions with simple arguments', function (done) {
+        var lv = L.func(function (arg) {
+            return arg + 1;
+        })(41);
+
+        lv.then(function (result) {
+            result.should.be.eql(42);
+        }).done(done);
     });
 });
