@@ -7,24 +7,26 @@ var Q = require('q');
 
 var L = require('../lib/laziness');
 
-describe('Laziness module', function () {
+describe('Laziness module:', function () {
 
-    it('should support lazy functions with no arguments', function () {
+    it('lazy func with no arguments', function () {
         var run = false;
         var lv = L.func(function () {
             run = true;
             return 42;
         })();
 
-        lv.isReady().should.be.eql(false);
-        run.should.be.eql(false);
-        lv.force();
-        lv.isReady().should.be.eql(true);
-        run.should.be.eql(true);
-        lv.get().should.be.eql(42);
+        setTimeout(function () {
+            lv.isReady().should.be.eql(false);
+            run.should.be.eql(false);
+            lv.force();
+            lv.isReady().should.be.eql(true);
+            run.should.be.eql(true);
+            lv.get().should.be.eql(42);
+        }, 5);
     });
 
-    it('should be thenable', function (done) {
+    it('lazy values are thenable', function (done) {
         var lv = L.func(function () {return 42;})();
 
         lv.then(function (result) {
@@ -32,7 +34,7 @@ describe('Laziness module', function () {
         }).done(done);
     });
 
-    it('should support functions returning promises', function (done) {
+    it('lazy func returning promise', function (done) {
         var run = false;
         var deferred = Q.defer();
 
@@ -46,12 +48,14 @@ describe('Laziness module', function () {
             lv.isReady().should.be.eql(true);
         }).done(done);
 
-        run.should.be.eql(true);
-        lv.isReady().should.be.eql(false);
-        deferred.resolve(42);
+        setTimeout(function () {
+            run.should.be.eql(true);
+            lv.isReady().should.be.eql(false);
+            deferred.resolve(42);
+        });
     });
 
-    it('should support lazy functions with simple argument', function (done) {
+    it('lazy func with simple argument', function (done) {
         var lv = L.func(function (arg) {
             return arg + 1;
         })(41);
@@ -61,7 +65,7 @@ describe('Laziness module', function () {
         }).done(done);
     });
 
-    it('should support promised argument', function (done) {
+    it('lazy func with promised argument', function (done) {
         var deferred = Q.defer();
         var run = false;
         var lv = L.func(function (arg) {
@@ -73,23 +77,119 @@ describe('Laziness module', function () {
             result.should.be.eql(42);
         }).done(done);
 
-        run.should.be.eql(false);
-        deferred.resolve(41);
+        setTimeout(function () {
+            run.should.be.eql(false);
+            deferred.resolve(41);
+        }, 5);
     });
 
-    it('should support two promised arguments', function (done) {
+    it('lazy func with two promised arguments', function (done) {
         var d1 = Q.defer();
         var d2 = Q.defer();
 
         var lv = L.func(function (a, b) {
-            return a + b
+            return a + b;
         })(d1.promise, d2.promise);
 
         lv.then(function (result) {
             result.should.be.eql(42);
         }).done(done);
 
-        d1.resolve(40);
-        d2.resolve(2)
+        setTimeout(function () {
+            d1.resolve(40);
+            d2.resolve(2);
+        }, 5);
     });
+
+    it('mixing promises and normal arguments', function (done) {
+        var d1 = Q.defer();
+        var lv = L.func(function (a, b) {
+            return a + b;
+        })(d1.promise, 4);
+
+        lv.then(function (result) {
+            result.should.be.eql(42);
+        }).done(done);
+
+        d1.resolve(38);
+    });
+
+    it('lazy arguments', function (done) {
+        var run1 = false;
+        var run2 = false;
+        var lv1 = L.func(function () {
+            run1 = true;
+            return 5;
+        })();
+        var lv2 = L.func(function (a, b) {
+            run2 = true;
+            return a + b;
+        })(lv1, 37);
+
+        setTimeout(function () {
+            run1.should.be.eql(false);
+            run2.should.be.eql(false);
+            lv2.then(function (result) {
+                result.should.be.eql(42);
+            }).done(done);
+        }, 5);
+    });
+
+    it('lazy if with simple condition', function (done) {
+        var run1 = false;
+        var run2 = false;
+
+        var lv1 = L.func(function () {
+            run1 = true;
+            return 42;
+        })();
+        var lv2 = L.func(function () {
+            run2 = true;
+            return 40;
+        })();
+
+        L.If(1, lv1, lv2).then(function (result) {
+            result.should.be.eql(42);
+        }).done();
+
+        setTimeout(function () {
+            run1.should.be.eql(true);
+            run2.should.be.eql(false);
+            done();
+        }, 5);
+    });
+
+    it('lazy if with promise condition', function (done) {
+        var deferred = Q.defer();
+        var lv1 = L.func(function () {return 42;})();
+        var lv2 = L.func(function () {return 40;})();
+
+        L.If(deferred.promise, lv1, lv2).then(function (result) {
+            result.should.be.eql(40);
+        }).done(done);
+
+        setTimeout(function () {deferred.resolve(0);}, 5);
+    });
+
+    it('lazy iff with simple condition', function (done) {
+        var run1 = false;
+        var run2 = false;
+
+        L.Iff(1, function Then() {
+            run1 = true;
+            return 42;
+        }, function Else() {
+            run2 = true;
+            return 40;
+        }).then(function (result) {
+            result.should.be.eql(42);
+        }).done();
+
+        setTimeout(function () {
+            run1.should.be.eql(true);
+            run2.should.be.eql(false);
+            done();
+        }, 5);
+    });
+
 });
