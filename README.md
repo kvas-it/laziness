@@ -1,4 +1,4 @@
-> General purpose lazy evaluation library.
+# General purpose lazy evaluation library.
 
 Status: completely experimental.
 
@@ -8,8 +8,16 @@ Status: completely experimental.
 Install the module with: `npm install laziness`
 
 ```js
-var laziness = require('laziness');
-laziness.awesome(); // "awesome"
+var L = require('laziness');
+
+var lazyFunc = L.func(function () {
+    // expensive computation returning value.
+});
+var lazyValue = lazyFunc();
+
+lazyValue.then(function (value) { // The computation will start here.
+    console.log(value);
+});
 ```
 
 
