@@ -1,6 +1,5 @@
 'use strict';
 
-var laziness = require('../lib/laziness.js');
+var L = require('../lib/laziness.js');
 
-laziness.awesome();
-// => awesome
+// Nothing for now.
