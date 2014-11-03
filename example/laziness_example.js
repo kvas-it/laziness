@@ -1,27 +1,51 @@
 'use strict';
 
+// First we do some preparation:
+// Imports.
 var L = require('../lib/laziness.js');
 var child_process = require('child_process');
 
-var hello = L.func(function (name) {
-    console.log('Hello, ' + name + '!');
+// Some functions with side effects.
+var morng = L.func(function (name) {
+    console.log('Good morning, ' + name + '!');
 });
 
-var byebye = L.func(function (name) {
-    console.log('Bye bye, ' + name + '!');
+var evng = L.func(function (name) {
+    console.log('Good evening, ' + name + '!');
 });
 
-var process = L.func(function (input) {
+// Wrap child_process.exec to produce lazy values.
+// L.nfunc wraps node.js-style callback APIs.
+var exec = L.nfunc(child_process.exec);
+
+// Simple processing of lazy values.
+var convert = L.func(function (input) {
     return input[0].substring(0, input[0].length - 1);
 });
 
-var whoami = L.nfunc(child_process.exec)('whoami');
-var name = process(whoami);
-var greeting = L.If(1,
-        hello(name),
-        byebye(name));
+var isEvening = L.func(function (input) {
+    return Number(input[0]) > 14;
+});
 
+// This function demonstrates the idea of the library. Normally the code
+// inside would be asynchronous with either pyramide of callbacks or
+// promise boilerplate. Using laziness we can just write simple code in
+// imperative/functional style.
+function greet() {
+    var whoami = exec('whoami');
+    var name = convert(whoami);
+    var eve = isEvening(exec('date +%H'));
+    return L.If(eve,
+            evng(name),
+            morng(name));
+}
+
+// This is our lazy computation. At this moment nothing is actually
+// done yet.
+var lazyGreeting = greet();
+
+// Now we can use it like this:
 console.log('Waking up.');
-greeting.then(function () {
+lazyGreeting.done(function () {
     console.log('Done.');
 });
