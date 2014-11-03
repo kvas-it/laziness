@@ -135,6 +135,30 @@ describe('Laziness module:', function () {
         }, 5);
     });
 
+    it('adapting callback APIs', function (done) {
+        var lv = L.nfunc(function (a, b, callback) {
+            Q.delay(5).then(function () {
+                callback(null, a + b);
+            });
+        })(40, 2);
+
+        lv.then(function (result) {
+            result.should.be.eql(42);
+        }).done(done);
+    });
+
+    it('reporting errors from callback APIs', function (done) {
+        L.nfunc(function (a, b, callback) {
+            a.should.be.eql(1);
+            b.should.be.eql(2);
+            callback(new Error('boom'));
+        })(1, 2).then(function () {
+            true.should.not.be.eql(true);
+        }, function (err) {
+            err.message.should.be.eql('boom');
+        }).done(done);
+    });
+
     it('lazy if with simple condition', function (done) {
         var run1 = false;
         var run2 = false;
