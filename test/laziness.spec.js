@@ -34,6 +34,15 @@ describe('Laziness module:', function () {
         }).done(done);
     });
 
+    it('lazy values have .done too', function (done) {
+        var lv = L.func(function () {return 42;})();
+
+        lv.done(function (result) {
+            result.should.be.eql(42);
+            done();
+        });
+    });
+
     it('lazy func returning promise', function (done) {
         var run = false;
         var deferred = Q.defer();
